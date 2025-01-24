@@ -12,13 +12,13 @@ function setAuth() { // 로그인된 유저의 유저정보(id, email)를 담는
     //initValues를 사용하지 않고 자바스크립트 스프레드를 이용하는 이유는
     //이렇게 해야 initVaues가 참조되지 않고 복제가 되서 나중에 초기화 시킬일 있을 때 변수로 만든 initVaues를 이용해
     //초기화 시킬 수 있기 때문
-    let ininValues = {
+    let initValues = {
         id: '',
         email: '',
         Authorization: '',
     }    
     
-    const { subscribe, set, update} = writable({...initVaues})
+    const { subscribe, set, update} = writable({...initValues})
 
     const refresh = async () => { //서버로 access_token을 다시 요청하는 메소드
         try {
@@ -31,11 +31,46 @@ function setAuth() { // 로그인된 유저의 유저정보(id, email)를 담는
             isRefresh.set(false)
         }
     }
-    const resetUserInfo = () => {   //auth스토어를 초기화 하는 메소드
 
+    const resetUserInfo = () => {   //auth스토어를 초기화 하는 메소드
+        set({...initValues})
     }
-    const login = async() => {}
-    const logout = async() => {}
+
+    const login = async() => {
+        try {
+            const options = {
+                path: '/auth/login',
+                data: {
+                    email: email,
+                    pwd: password,
+                }
+            }
+
+            const result = await postApi(options);
+            set(result)
+            isRefresh.set(true)
+            router.goto('/articles');
+        }
+        catch(error) {
+            alert('오류가 발생했습니다. 로그인을 다시 시도해 주세요.');
+        }
+    }
+
+    const logout = async() => {
+        try {
+            const options = {
+                path: 'auth/logout',
+            }
+
+            await delApi({options});
+            set({...initValues})
+            isRefresh.set(false)
+            router.goto('/')
+        }
+        catch(error) {
+            alert('오류가 발생했습니다. 다시 시도해 주세요.')
+        }
+    }
     const register = async() => {}
 
     return {
@@ -47,6 +82,7 @@ function setAuth() { // 로그인된 유저의 유저정보(id, email)를 담는
         register,
     }
 }                       
+
 function setArticlesMode() {}               // 보기의 상태를 나타내는 스토어 / 보기모드는 모두보기, 좋아요 보기, 내글 보기 3가지 가질 예정
 function setIsLogin() {}                    // 로그인 상태인지 아닌지 파악하는 스토어
 
