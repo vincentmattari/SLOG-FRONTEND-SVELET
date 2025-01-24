@@ -1,6 +1,32 @@
 import axios from "axios";
 
 const send = async ({method='', path='', data={}, access_token=''} = {}) => {
+    const commonUrl = 'http://localhost:3000'
+    const url = commonUrl + path
+    const headers = {
+        "Access-Control-Allow-Origin": commonUrl,
+        "Access-Control-Allow-Credentials": true,
+        "content-type": "application/json;charset=UTF-8",
+        "accept": "application/json",
+        "SameSite": "None",
+        "Authorization": access_token
+    }
+
+    const options = {
+        method,
+        url,
+        headers,
+        data,
+        withCredentials: true,
+    }
+
+    try {
+        const reponse = await axios(options);
+        return Response.data
+    }
+    catch(error) {
+        throw error
+    }
 
 }
 
